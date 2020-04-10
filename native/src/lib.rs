@@ -41,6 +41,7 @@ fn hello(mut cx: FunctionContext) -> JsResult<JsValue> {
     // return back to nodejs
     let result = neon_serde::to_value(&mut cx, &list)?;
     Ok(result)
+    // Ok(cx.undefined().upcast())
 }
 
 register_module!(mut cx, { cx.export_function("hello", hello) });
