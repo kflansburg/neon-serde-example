@@ -1,3 +1,8 @@
+#![feature(test)]
+extern crate test;
+
+use std::fs;
+
 extern crate serde;
 extern crate serde_json;
 
@@ -11,7 +16,7 @@ use neon_serde;
 extern crate serde_derive;
 use serde::{Deserialize};
 
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize)]
 struct Data {
     name: Name,
     index: usize
@@ -19,18 +24,18 @@ struct Data {
 
 #[derive(Serialize, Deserialize)]
 struct Link {
-    page: Page,
-    group: Group,
-    stuff: Data
+    page: usize,
+    group: usize,
+    stuff: serde_json::Value 
 }
 
-#[derive(Serialize, PartialOrd, Ord, PartialEq, Eq, Clone, Copy)]
+#[derive(Serialize, PartialOrd, Ord, PartialEq, Eq)]
 struct Name(usize);
 
-#[derive(Serialize, PartialOrd, Ord, PartialEq, Eq, Clone, Copy)]
+#[derive(Serialize, PartialOrd, Ord, PartialEq, Eq)]
 struct Group(usize);
 
-#[derive(Serialize, PartialOrd, Ord, PartialEq, Eq, Clone, Copy)]
+#[derive(Serialize, PartialOrd, Ord, PartialEq, Eq)]
 struct Page(usize);
 
 struct GroupVisitor;
@@ -105,27 +110,42 @@ impl<'de> Deserialize<'de> for Name {
 #[derive(Deserialize)]
 struct ObjectTuple<K,V>(#[serde(with = "tuple_vec_map")] Vec<(K,V)>) where K: serde::de::DeserializeOwned, V: serde::de::DeserializeOwned;
 
+fn parse(input: &str) -> Vec<Link> {
+    let mut object : ObjectTuple<Page, ObjectTuple<Group, Vec<serde_json::Value>>> = serde_json::from_str(input).unwrap();
+
+    let mut list: Vec<Link> = Vec::new();
+
+    for (Page(page), mut pages) in object.0.drain(..) {
+        for (Group(group), mut groups)  in pages.0.drain(..) {
+            for stuff in groups.drain(..) {
+                list.push(Link {
+                    stuff,
+                    page,
+                    group
+                })
+            }
+        }
+    }
+
+    list
+}
+
 fn hello(mut cx: FunctionContext) -> JsResult<JsValue> {
     let arg0: String = cx.argument::<JsString>(0)?.value();
-
-    let object : ObjectTuple<Page, ObjectTuple<Group, Vec<Data>>> = serde_json::from_str(& arg0).unwrap();
-
-    let list: Vec<Link> = object.0.iter().map(|(page_key, page)| {
-        page.0.iter().map(move |(group_key, group)| {
-           group.iter().map(move |data| {
-               Link {
-                   stuff: *data,
-                   page: *page_key,
-                   group: *group_key
-               }
-           })
-        })
-    }).flatten().flatten().collect();
-
-    // return back to nodejs
-    let result = neon_serde::to_value(&mut cx, &list)?;
+    let result = neon_serde::to_value(&mut cx, &parse(&arg0))?;
     Ok(result)
-    // Ok(cx.undefined().upcast())
 }
 
 register_module!(mut cx, { cx.export_function("hello", hello) });
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use test::Bencher;
+
+    #[bench]
+    fn bench_add_two(b: &mut Bencher) {
+        let input = fs::read_to_string("input.json").unwrap(); 
+        b.iter(|| parse(&input));
+    }
+}
