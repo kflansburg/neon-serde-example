@@ -7,6 +7,9 @@ build = "build.rs"
 edition = "2018"
 exclude = ["artifacts.json", "index.node"]
 
+[build]
+rustflags = "-C target-cpu=native"
+
 [lib]
 name = "object"
 crate-type = ["cdylib"]
