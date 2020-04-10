@@ -294,7 +294,7 @@ lodash.padend@^4.6.1:
   resolved "https://registry.npm.taobao.org/lodash.padend/download/lodash.padend-4.6.1.tgz#53ccba047d06e158d311f45da625f4e49e6f166e"
   integrity sha1-U8y6BH0G4VjTEfRdpiX05J5vFm4=
 
-lodash@^4.17.4, lodash@^4.3.0:
+lodash@^4.17.15, lodash@^4.17.4, lodash@^4.3.0:
   version "4.17.15"
   resolved "https://registry.npm.taobao.org/lodash/download/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
   integrity sha1-tEf2ZwoEVbv+7dETku/zMOoJdUg=

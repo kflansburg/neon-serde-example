@@ -1,17 +1,15 @@
+extern crate neon;
 extern crate serde;
 extern crate serde_json;
 
-use neon::prelude::*;
-
 #[macro_use]
 extern crate serde_derive;
-use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
 
 #[macro_use]
-extern crate neon;
-#[macro_use]
 extern crate neon_serde;
+
+use neon::prelude::*;
+use serde_json::{Value};
 
 #[derive(Serialize, Deserialize)]
 struct Link {
@@ -21,16 +19,6 @@ struct Link {
 }
 
 export! {
-    fn hellojson() -> String {
-        let jsondata = json!({"page1":{"group1":[{"name":"name1","index":1},{"name":"name33","index":33},{"name":"name45","index":45}]},"page500":{"group25":[{"name":"name1","index":1},{"name":"name33","index":33},{"name":"name45","index":45}]}});
-        let result = serde_json::to_string(&jsondata).unwrap();
-        return format!("{}", result);
-    }
-    fn hello2(input: String) -> String {
-        let object: Value = serde_json::from_str(&input).unwrap();
-        let result = serde_json::to_string(&object).unwrap();
-        return format!("{}", result);
-    }
     fn hello(input: String) -> String {
         let mut list = vec![];
         let object: Value = serde_json::from_str(&input).unwrap();

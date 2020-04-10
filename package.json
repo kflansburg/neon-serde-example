@@ -7,9 +7,10 @@
   "license": "MIT",
   "dependencies": {
     "benchmark": "^2.1.4",
+    "lodash": "^4.17.15",
     "neon-cli": "^0.4.0"
   },
   "scripts": {
-    "install": "neon build"
+    "install": "RUSTFLAGS=\"-Ctarget-cpu=native\" neon build"
   }
 }
